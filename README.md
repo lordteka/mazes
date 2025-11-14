@@ -4,4 +4,6 @@ Ruby 3 or above
 
 ## Usage
 
-`ruby maze.rb <width> <height>`
+### Generate square maze
+
+`ruby generator.rb <width> <height>`
