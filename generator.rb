@@ -22,20 +22,22 @@ class Generator
 
     # https://en.wikipedia.org/wiki/Maze_generation_algorithm#Iterative_implementation_(with_stack)
     def open_walls
-      stack = [@maze.sample.sample]
+      cell = @maze.sample.sample
+      cell.visited = true
+      stack = [cell]
 
-      while !stack.empty?
-        cell = stack.pop
-
+      until stack.empty?
         neighbour, relative_pos = random_unvisited_neighbour(cell)
 
-        next if neighbour.nil?
+        next cell = stack.pop if neighbour.nil?
 
         open_wall(cell, neighbour, relative_pos)
 
         stack.push(cell)
+
         neighbour.visited = true
-        stack.push(neighbour)
+
+        cell = neighbour
       end
     end
 
