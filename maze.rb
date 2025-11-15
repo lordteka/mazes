@@ -28,12 +28,12 @@ class Maze
   def to_s
     [
       "+#{@maze[0].map { |cell| cell.walls.up ? '-' : ' ' }.join('+')}+\n",
-    @maze.map do |line|
-      [
-        "#{line[0].walls.left ? '|' : ' '} #{line.map { |cell| cell.walls.right ? '|' : ' ' }.join(' ')}\n",
-        "+#{line.map { |cell| cell.walls.down ? '-' : ' ' }.join('+')}+\n"
-      ].join('')
-    end
+      @maze.map do |line|
+        [
+          "#{line[0].walls.left ? '|' : ' '} #{line.map { |cell| cell.walls.right ? '|' : ' ' }.join(' ')}\n",
+          "+#{line.map { |cell| cell.walls.down ? '-' : ' ' }.join('+')}+\n"
+        ]
+      end
     ].join('')
   end
 
