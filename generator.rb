@@ -2,7 +2,7 @@ require_relative 'maze'
 
 class Generator
   class << self
-    def new_maze(width, height)
+    def perform(width, height)
       @maze = height.times.map do |y|
         width.times.map do |x|
           Cell.new(pos: Pos.new(x, y))
@@ -98,4 +98,4 @@ class Generator
   end
 end
 
-puts Generator.new_maze(ARGV[0].to_i, ARGV[1].to_i)
+puts Generator.perform(ARGV[0].to_i, ARGV[1].to_i)

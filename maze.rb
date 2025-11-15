@@ -1,6 +1,6 @@
 Pos = Struct.new('Pos', :x, :y)
 
-Walls = Struct.new('Walls', :up, :right, :down, :left) do
+Walls = Struct.new('Walls', :up, :right, :down, :left, keyword_init: true) do
   def initialize(*)
     super
 
@@ -14,6 +14,7 @@ end
 Cell = Struct.new('Cell', :visited, :pos, :walls, keyword_init: true) do
   def initialize(*)
     super
+
     self.visited ||= false
     self.walls ||= Walls.new
   end
@@ -34,5 +35,31 @@ class Maze
       ].join('')
     end
     ].join('')
+  end
+
+  def self.from_string(s)
+    lines = s.split("\n")
+    cell_x = -1
+    cell_y = -1
+
+    Maze.new(
+      (1...lines.length).step(2).map do |y|
+        cell_y += 1
+
+        (1...lines[y].length).step(2).map do |x|
+          cell_x += 1
+
+          Cell.new(
+            pos: Pos.new(cell_x, cell_y),
+            walls: Walls.new(
+              up: lines[y - 1][x] != ' ',
+              right: lines[y][x + 1] != ' ',
+              down: lines[y + 1][x] != ' ',
+              left: lines[y][x - 1] != ' '
+            )
+          )
+        end
+      end
+    )
   end
 end
