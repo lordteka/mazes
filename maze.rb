@@ -54,7 +54,7 @@ class Maze
 
   def to_s
     x_length = (width + 1) * 2
-    s = ' ' * (((width + 1) * 2) * (height * 2 + 1))
+    s = '+' * (((width + 1) * 2) * (height * 2 + 1))
 
     @maze.each do |line|
       line.each do |cell|
@@ -62,20 +62,12 @@ class Maze
 
         s[i] = cell.path ? '*' : ' '
 
-        # cell corners
-        s[i - x_length - 1] = '+'
-        s[i - x_length + 1] = '+'
-        s[i + x_length - 1] = '+'
-        s[i + x_length + 1] = '+'
-
-        # cell walls
         s[i - 1] = cell_wall_char(cell, :left)
-        s[i + 1] = cell_wall_char(cell, :right)
         s[i - x_length] = cell_wall_char(cell, :up)
-        s[i + x_length] = cell_wall_char(cell, :down)
+        s[i + x_length] = cell_wall_char(cell, :down) if cell.pos.y == height - 1
 
-        # line breaks
         if cell.pos.x == width - 1
+          s[i + 1] = cell_wall_char(cell, :right)
           s[i - x_length + 2] = "\n"
           s[i + 2] = "\n"
           s[i + x_length + 2] = "\n"
