@@ -112,8 +112,29 @@ class Maze
     @maze[0].length
   end
 
-  def [](index)
-    @maze[index]
+  def at(pos)
+    @maze[pos.y][pos.x]
+  end
+
+  def neighbour(pos, direction)
+    case direction
+    when :up
+      return if pos.y == 0
+
+      @maze[pos.y - 1][pos.x]
+    when :right
+      return if pos.x == width - 1
+
+      @maze[pos.y][pos.x + 1]
+    when :down
+      return if pos.y == height - 1
+
+      @maze[pos.y + 1][pos.x]
+    when :left
+      return if pos.x == 0
+
+      @maze[pos.y][pos.x - 1]
+    end
   end
 
   def open_wall(pos, direction)
@@ -132,16 +153,16 @@ class Maze
     case direction
     when :up
       cell.walls.up = state
-      @maze[pos.y - 1][pos.x].walls.down = state
-    when :down
-      cell.walls.down = state
-      @maze[pos.y + 1][pos.x].walls.up = state
-    when :left
-      cell.walls.left = state
-      @maze[pos.y][pos.x - 1].walls.right = state
+      neighbour(cell.pos, :up).walls.down = state
     when :right
       cell.walls.right = state
-      @maze[pos.y][pos.x + 1].walls.left = state
+      neighbour(cell.pos, :right).walls.left = state
+    when :down
+      cell.walls.down = state
+      neighbour(cell.pos, :down).walls.up = state
+    when :left
+      cell.walls.left = state
+      neighbour(cell.pos, :left).walls.right = state
     end
   end
 
@@ -161,19 +182,19 @@ class Maze
     when :up
       return '*' if cell.pos.y == 0
 
-      @maze[cell.pos.y - 1][cell.pos.x].path ? '*' : ' '
+      neighbour(cell.pos, :up).path ? '*' : ' '
     when :right
       return '*' if cell.pos.x == width - 1
 
-      @maze[cell.pos.y][cell.pos.x + 1].path ? '*' : ' '
+      neighbour(cell.pos, :right).path ? '*' : ' '
     when :down
       return '*' if cell.pos.y == height - 1
 
-      @maze[cell.pos.y + 1][cell.pos.x].path ? '*' : ' '
+      neighbour(cell.pos, :down).path ? '*' : ' '
     when :left
       return '*' if cell.pos.x == 0
 
-      @maze[cell.pos.y][cell.pos.x - 1].path ? '*' : ' '
+      neighbour(cell.pos, :left).path ? '*' : ' '
     end
   end
 end

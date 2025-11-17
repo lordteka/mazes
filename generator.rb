@@ -44,26 +44,26 @@ class Generator
     end
 
     def random_unvisited_neighbour(cell)
-      neighbours = []
+      neighbours = [
+        [@maze.neighbour(cell.pos, :up), :up],
+        [@maze.neighbour(cell.pos, :right), :right],
+        [@maze.neighbour(cell.pos, :down), :down],
+        [@maze.neighbour(cell.pos, :left), :left]
+      ]
 
-      neighbours.push([@maze[cell.pos.y - 1][cell.pos.x], :up]) if cell.pos.y > 0
-      neighbours.push([@maze[cell.pos.y + 1][cell.pos.x], :down]) if cell.pos.y < @maze.height - 1
-      neighbours.push([@maze[cell.pos.y][cell.pos.x - 1], :left]) if cell.pos.x > 0
-      neighbours.push([@maze[cell.pos.y][cell.pos.x + 1], :right]) if cell.pos.x < @maze.width - 1
-
-      neighbours.reject {|cell, _pos| cell.visited }.sample
+      neighbours.reject {|cell, _pos| cell.nil? || cell.visited }.sample
     end
 
     def open_entrance(entrance)
-      return @maze[entrance.y][entrance.x].walls.up = false if entrance.y == 0
+      return @maze.at(entrance).walls.up = false if entrance.y == 0
 
-      @maze[entrance.y][entrance.x].walls.left = false
+      @maze.at(entrance).walls.left = false
     end
 
     def open_exit(exit_)
-      return @maze[exit_.y][exit_.x].walls.down = false if exit_.y == @maze.height - 1
+      return @maze.at(exit_).walls.down = false if exit_.y == @maze.height - 1
 
-      @maze[exit_.y][exit_.x].walls.right = false
+      @maze.at(exit_).walls.right = false
     end
 
     def random_entrance

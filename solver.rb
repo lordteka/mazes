@@ -9,7 +9,7 @@ class Solver
 
       @maze.each do |cell|
         if !cell.visited
-          maze[cell.pos.y][cell.pos.x].path = true
+          maze.at(cell.pos).path = true
         end
       end
 
