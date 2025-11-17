@@ -28,6 +28,9 @@ class Maze
   PATH_CHAR = '*'.freeze
   EMPTY_CHAR = ' '.freeze
 
+  BEGIN_RED = "\e[31m".freeze
+  END_COLOR = "\e[0m".freeze
+
   class << self
     def from_string(s)
       lines = s.split("\n")
@@ -62,7 +65,7 @@ class Maze
 
   def to_s
     x_length = (width + 1) * 2
-    s = CORNER_CHAR * (((width + 1) * 2) * (height * 2 + 1))
+    s = CORNER_CHAR * (x_length * (height * 2 + 1))
 
     @maze.each do |line|
       line.each do |cell|
@@ -83,11 +86,7 @@ class Maze
       end
     end
 
-    s
-  end
-
-  def path?(cell)
-    !cell.visited?
+    colorize(s)
   end
 
   def deep_clone
@@ -204,5 +203,9 @@ class Maze
 
       neighbour(cell.pos, :left).path ? PATH_CHAR : EMPTY_CHAR
     end
+  end
+
+  def colorize(s)
+    s.gsub(/[#{PATH_CHAR}]+/, BEGIN_RED + '\0' + END_COLOR)
   end
 end
