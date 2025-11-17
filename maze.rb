@@ -22,30 +22,38 @@ Cell = Struct.new('Cell', :visited, :pos, :walls, :path, keyword_init: true) do
 end
 
 class Maze
-  def self.from_string(s)
-    lines = s.split("\n")
-    cell_y = -1
+  CORNER_CHAR = '+'.freeze
+  VERTICAL_WALL_CHAR = '-'.freeze
+  HORIZONTAL_WALL_CHAR = '|'.freeze
+  PATH_CHAR = '*'.freeze
+  EMPTY_CHAR = ' '.freeze
 
-    Maze.new(
-      (1...lines.length).step(2).map do |y|
-        cell_x = -1
-        cell_y += 1
+  class << self
+    def from_string(s)
+      lines = s.split("\n")
+      cell_y = -1
 
-        (1...lines[y].length).step(2).map do |x|
-          cell_x += 1
+      Maze.new(
+        (1...lines.length).step(2).map do |y|
+          cell_x = -1
+          cell_y += 1
 
-          Cell.new(
-            pos: Pos.new(cell_x, cell_y),
-            walls: Walls.new(
-              up: lines[y - 1][x] != ' ',
-              right: lines[y][x + 1] != ' ',
-              down: lines[y + 1][x] != ' ',
-              left: lines[y][x - 1] != ' '
+          (1...lines[y].length).step(2).map do |x|
+            cell_x += 1
+
+            Cell.new(
+              pos: Pos.new(cell_x, cell_y),
+              walls: Walls.new(
+                up: lines[y - 1][x] != EMPTY_CHAR,
+                right: lines[y][x + 1] != EMPTY_CHAR,
+                down: lines[y + 1][x] != EMPTY_CHAR,
+                left: lines[y][x - 1] != EMPTY_CHAR
+              )
             )
-          )
+          end
         end
-      end
-    )
+      )
+    end
   end
 
   def initialize(cells)
@@ -54,13 +62,13 @@ class Maze
 
   def to_s
     x_length = (width + 1) * 2
-    s = '+' * (((width + 1) * 2) * (height * 2 + 1))
+    s = CORNER_CHAR * (((width + 1) * 2) * (height * 2 + 1))
 
     @maze.each do |line|
       line.each do |cell|
         i = cell.pos.x * 2 + 1 + (cell.pos.y * 2 + 1) * x_length
 
-        s[i] = cell.path ? '*' : ' '
+        s[i] = cell.path ? PATH_CHAR : EMPTY_CHAR
 
         s[i - 1] = cell_wall_char(cell, :left)
         s[i - x_length] = cell_wall_char(cell, :up)
@@ -170,31 +178,31 @@ class Maze
     if cell.walls.send(direction)
       case direction
       when :up, :down
-        return '-'
+        return VERTICAL_WALL_CHAR
       when :left, :right
-        return '|'
+        return HORIZONTAL_WALL_CHAR
       end
     end
 
-    return ' ' if !cell.path
+    return EMPTY_CHAR if !cell.path
 
     case direction
     when :up
-      return '*' if cell.pos.y == 0
+      return PATH_CHAR if cell.pos.y == 0
 
-      neighbour(cell.pos, :up).path ? '*' : ' '
+      neighbour(cell.pos, :up).path ? PATH_CHAR : EMPTY_CHAR
     when :right
-      return '*' if cell.pos.x == width - 1
+      return PATH_CHAR if cell.pos.x == width - 1
 
-      neighbour(cell.pos, :right).path ? '*' : ' '
+      neighbour(cell.pos, :right).path ? PATH_CHAR : EMPTY_CHAR
     when :down
-      return '*' if cell.pos.y == height - 1
+      return PATH_CHAR if cell.pos.y == height - 1
 
-      neighbour(cell.pos, :down).path ? '*' : ' '
+      neighbour(cell.pos, :down).path ? PATH_CHAR : EMPTY_CHAR
     when :left
-      return '*' if cell.pos.x == 0
+      return PATH_CHAR if cell.pos.x == 0
 
-      neighbour(cell.pos, :left).path ? '*' : ' '
+      neighbour(cell.pos, :left).path ? PATH_CHAR : EMPTY_CHAR
     end
   end
 end
