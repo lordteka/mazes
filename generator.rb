@@ -1,11 +1,18 @@
+require 'optparse'
+
 require_relative 'maze'
+require_relative 'hexa_maze'
 
 class Generator
   class << self
-    def perform(width, height)
-      @maze = Maze.new(
-        height.times.map do |y|
-          width.times.map do |x|
+    def perform(options)
+      @options = options
+
+      maze_klass = options[:shape] == :hexa ? HexaMaze : Maze
+
+      @maze = maze_klass.new(
+        options[:height].times.map do |y|
+          options[:width].times.map do |x|
             Cell.new(pos: Pos.new(x, y))
           end
         end
@@ -51,19 +58,32 @@ class Generator
         [@maze.neighbour(cell.pos, :left), :left]
       ]
 
+      if @options[:shape] == :hexa
+        neighbours += [
+          [@maze.neighbour(cell.pos, :down_right), :down_right],
+          [@maze.neighbour(cell.pos, :down_left), :down_left],
+        ]
+      end
+
       neighbours.reject {|cell, _pos| cell.nil? || cell.visited }.sample
     end
 
     def open_entrance(entrance)
       return @maze.at(entrance).walls.up = false if entrance.y == 0
 
-      @maze.at(entrance).walls.left = false
+      walls_to_open = [:left]
+      walls_to_open += [:down_left] if @options[:shape] == :hexa
+
+      @maze.at(entrance).walls.send(:"#{walls_to_open.sample}=" ,false)
     end
 
     def open_exit(exit_)
       return @maze.at(exit_).walls.down = false if exit_.y == @maze.height - 1
 
-      @maze.at(exit_).walls.right = false
+      walls_to_open = [:right]
+      walls_to_open += [:down_right] if @options[:shape] == :hexa
+
+      @maze.at(exit_).walls.send(:"#{walls_to_open.sample}=" ,false)
     end
 
     def random_entrance
@@ -85,4 +105,12 @@ class Generator
   end
 end
 
-puts Generator.perform(ARGV[0].to_i, ARGV[1].to_i)
+options = {width: 10, height: 10, shape: :square}
+
+OptionParser.new do |parser|
+  parser.on('-s SHAPE', '--shape', %i[square hexa], "Tile shape. Can be 'square' or 'hexa'. Default to 'square'")
+  parser.on('-w WIDTH', '--width', Integer)
+  parser.on('-h HEIGHT', '--height', Integer)
+end.parse!(into: options)
+
+puts Generator.perform(options)

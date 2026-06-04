@@ -26,7 +26,7 @@ class Solver
           any = true
           cell.visited = true
 
-          direction = cell.walls.deconstruct_keys([:up, :right, :down, :left]).select { |k, v| !v }.keys.first
+          direction = cell.walls.deconstruct_keys(%i[up right down left]).select { |k, v| !v }.keys.first
 
           @maze.close_wall(cell.pos, direction)
         end

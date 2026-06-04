@@ -1,6 +1,6 @@
 Pos = Struct.new('Pos', :x, :y)
 
-Walls = Struct.new('Walls', :up, :right, :down, :left, keyword_init: true) do
+Walls = Struct.new('Walls', :up, :right, :down, :left, :down_right, :down_left, keyword_init: true) do
   def initialize(*)
     super
 
@@ -8,6 +8,8 @@ Walls = Struct.new('Walls', :up, :right, :down, :left, keyword_init: true) do
     self.right = true if self.right != false
     self.down = true if self.down != false
     self.left = true if self.left != false
+    self.down_right = true if self.down_right != false
+    self.down_left = true if self.down_left != false
   end
 end
 
@@ -129,14 +131,14 @@ class Maze
       return if pos.y == 0
 
       @maze[pos.y - 1][pos.x]
-    when :right
-      return if pos.x == width - 1
-
-      @maze[pos.y][pos.x + 1]
     when :down
       return if pos.y == height - 1
 
       @maze[pos.y + 1][pos.x]
+    when :right
+      return if pos.x == width - 1
+
+      @maze[pos.y][pos.x + 1]
     when :left
       return if pos.x == 0
 
@@ -156,19 +158,16 @@ class Maze
 
   def change_wall_state(pos, direction, state)
     cell = @maze[pos.y][pos.x]
+    cell.walls.send(:"#{direction}=", state)
 
     case direction
     when :up
-      cell.walls.up = state
       neighbour(cell.pos, :up).walls.down = state
     when :right
-      cell.walls.right = state
       neighbour(cell.pos, :right).walls.left = state
     when :down
-      cell.walls.down = state
       neighbour(cell.pos, :down).walls.up = state
     when :left
-      cell.walls.left = state
       neighbour(cell.pos, :left).walls.right = state
     end
   end
@@ -185,24 +184,19 @@ class Maze
 
     return EMPTY_CHAR if !cell.path
 
+    # handle entrance and exit
     case direction
     when :up
       return PATH_CHAR if cell.pos.y == 0
-
-      neighbour(cell.pos, :up).path ? PATH_CHAR : EMPTY_CHAR
-    when :right
+    when :right, :down_right
       return PATH_CHAR if cell.pos.x == width - 1
-
-      neighbour(cell.pos, :right).path ? PATH_CHAR : EMPTY_CHAR
     when :down
       return PATH_CHAR if cell.pos.y == height - 1
-
-      neighbour(cell.pos, :down).path ? PATH_CHAR : EMPTY_CHAR
-    when :left
+    when :left, :down_left
       return PATH_CHAR if cell.pos.x == 0
-
-      neighbour(cell.pos, :left).path ? PATH_CHAR : EMPTY_CHAR
     end
+
+    neighbour(cell.pos, direction).path ? PATH_CHAR : EMPTY_CHAR
   end
 
   def colorize(s)
