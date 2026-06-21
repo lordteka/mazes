@@ -1,8 +1,9 @@
-require_relative 'maze'
+require_relative 'hexa_maze'
 
 class Solver
   class << self
-    def perform(maze)
+    def perform(string)
+      maze = get_maze(string)
       @maze = maze.deep_clone
 
       while fill_dead_ends; end
@@ -18,15 +19,23 @@ class Solver
 
     private
 
+    def get_maze(string)
+      if string[0] == Maze::CORNER_CHAR
+        Maze.from_string(string)
+      else
+        HexaMaze.from_string(string)
+      end
+    end
+
     def fill_dead_ends
       any = false
 
       @maze.each do |cell|
-        if cell.walls.count(&:itself) == 3
+        if cell.walls.count(&:itself) == 5
           any = true
           cell.visited = true
 
-          direction = cell.walls.deconstruct_keys(%i[up right down left]).select { |k, v| !v }.keys.first
+          direction = cell.walls.deconstruct_keys(%i[up right down left down_left down_right]).select { |k, v| !v }.keys.first
 
           @maze.close_wall(cell.pos, direction)
         end
@@ -37,4 +46,4 @@ class Solver
   end
 end
 
-puts Solver.perform(Maze.from_string(ARGF.read))
+puts Solver.perform(ARGF.read)

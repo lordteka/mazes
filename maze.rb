@@ -92,7 +92,7 @@ class Maze
   end
 
   def deep_clone
-    Maze.new(
+    self.class.new(
       @maze.map do |line|
         line.map do |cell|
           Cell.new(pos: cell.pos, walls: cell.walls.clone)
@@ -196,7 +196,7 @@ class Maze
       return PATH_CHAR if cell.pos.x == 0
     end
 
-    neighbour(cell.pos, direction).path ? PATH_CHAR : EMPTY_CHAR
+    self.neighbour(cell.pos, direction).path ? PATH_CHAR : EMPTY_CHAR
   end
 
   def colorize(s)

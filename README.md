@@ -8,7 +8,7 @@ Ruby 3 or above
 
 `ruby generator.rb -w <width> -h <height> [-s <square|hexa>]`
 
-### Solve square maze
+### Solve maze
 
 The solver assume the same input format as the generator output
 

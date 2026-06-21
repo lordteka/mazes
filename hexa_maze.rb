@@ -4,6 +4,38 @@ class HexaMaze < Maze
   RIGHT_WALL_CHAR = '\\'.freeze
   LEFT_WALL_CHAR = '/'.freeze
   VERTICAL_WALL_CHAR = '_'.freeze
+  EMPTY_CHAR = ' '.freeze
+
+  class << self
+    def from_string(s)
+      lines = s.split("\n")
+      cell_y = -1
+
+      HexaMaze.new(
+        (1...lines.length-1).step(2).map do |line|
+          cell_x = -1
+          cell_y += 1
+
+          (1...lines[line].length).step(3).map do |x|
+            cell_x += 1
+            y = cell_x % 2 == 0 ? line : line + 1
+
+            Cell.new(
+              pos: Pos.new(cell_x, cell_y),
+              walls: Walls.new(
+                up: lines[y - 1][x] != EMPTY_CHAR && lines[y - 1][x + 1] != EMPTY_CHAR,
+                right: lines[y][x + 2] != EMPTY_CHAR,
+                down: lines[y + 1][x] != EMPTY_CHAR && lines[y + 1][x + 1] != EMPTY_CHAR,
+                left: lines[y][x - 1] != EMPTY_CHAR,
+                down_right: lines[y + 1][x + 2] != EMPTY_CHAR,
+                down_left: lines[y + 1][x - 1] != EMPTY_CHAR,
+              )
+            )
+          end
+        end
+      )
+    end
+  end
 
   def to_s
     x_length = width * 3 + 2
@@ -15,7 +47,7 @@ class HexaMaze < Maze
         i += (cell.pos.y * 2 + 1) * x_length
         i += x_length if cell.pos.x % 2 == 1
 
-        #s[i] = PATH_CHAR
+        s[i] = cell.path ? PATH_CHAR : EMPTY_CHAR
 
         s[i - x_length] = cell_wall_char(cell, :up)
         s[i + 1 - x_length] = cell_wall_char(cell, :up)
@@ -39,7 +71,7 @@ class HexaMaze < Maze
       end
     end
 
-    s
+    colorize(s)
   end
 
   def neighbour(pos, direction)
