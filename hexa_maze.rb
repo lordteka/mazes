@@ -55,11 +55,15 @@ class HexaMaze < Maze
     x_length = width * 3 + 2
     s = EMPTY_CHAR * (x_length * (height * 2 + 2))
 
-    @maze.flatten.group_by {|c| c.path }.each do |path, cells|
-      cells.each do |cell|
-        print_cell(s, cell, path)
+    m = @maze.flatten.group_by {|c| c.path }
+
+    m[false].each do |cell|
+        print_cell(s, cell, false)
       end
-    end
+
+    m[true].each do |cell|
+      print_cell(s, cell, true)
+    end unless m[true].nil?
 
     colorize(s)
   end
