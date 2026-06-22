@@ -1,10 +1,24 @@
 require_relative 'maze'
 
 class HexaMaze < Maze
-  RIGHT_WALL_CHAR = '\\'.freeze
-  LEFT_WALL_CHAR = '/'.freeze
-  VERTICAL_WALL_CHAR = '_'.freeze
   EMPTY_CHAR = ' '.freeze
+
+  WALL_CHARS = {
+    # the sole purpose of this char set is to be gsub by the basic char but with color around so we see the path
+    true => {
+      vertical: '=',
+      left: '>',
+      right: '<',
+      no_wall: ' '
+    },
+    # basic char set
+    false => {
+      vertical: '_',
+      left: '/',
+      right: '\\',
+      no_wall: ' '
+    }
+  }.freeze
 
   class << self
     def from_string(s)
@@ -41,33 +55,9 @@ class HexaMaze < Maze
     x_length = width * 3 + 2
     s = EMPTY_CHAR * (x_length * (height * 2 + 2))
 
-    @maze.each do |line|
-      line.each do |cell|
-        i = cell.pos.x * 3 + 1
-        i += (cell.pos.y * 2 + 1) * x_length
-        i += x_length if cell.pos.x % 2 == 1
-
-        s[i] = cell.path ? PATH_CHAR : EMPTY_CHAR
-
-        s[i - x_length] = cell_wall_char(cell, :up)
-        s[i + 1 - x_length] = cell_wall_char(cell, :up)
-
-        s[i + 2] = cell_wall_char(cell, :right)
-        s[i + 2 + x_length] = cell_wall_char(cell, :down_right)
-
-        s[i + x_length] = cell_wall_char(cell, :down)
-        s[i + 1 + x_length] = cell_wall_char(cell, :down)
-
-        s[i - 1] = cell_wall_char(cell, :left)
-        s[i - 1 + x_length] = cell_wall_char(cell, :down_left)
-
-
-        if cell.pos.x == width - 1
-          s[i + 3 - 2 * x_length] = "\n" if cell.pos.y == 0
-          s[i + 3 - x_length] = "\n" if cell.pos.y == 0
-          s[i + 3] = "\n"
-          s[i + 3 + x_length] = "\n"
-        end
+    @maze.flatten.group_by {|c| c.path }.each do |path, cells|
+      cells.each do |cell|
+        print_cell(s, cell, path)
       end
     end
 
@@ -129,14 +119,53 @@ class HexaMaze < Maze
     if cell.walls.send(direction)
       case direction
       when :up, :down
-        return VERTICAL_WALL_CHAR
+        return :vertical
       when :right, :down_left
-        return RIGHT_WALL_CHAR
+        return :right
       when :left, :down_right
-        return LEFT_WALL_CHAR
+        return :left
       end
     end
 
-    super(cell, direction)
+    :no_wall
+  end
+
+  def print_cell(s, cell, path)
+    x_length = width * 3 + 2
+    char_set = WALL_CHARS[path]
+
+    i = cell.pos.x * 3 + 1
+    i += (cell.pos.y * 2 + 1) * x_length
+    i += x_length if cell.pos.x % 2 == 1
+
+    s[i - x_length] = char_set[cell_wall_char(cell, :up)]
+    s[i + 1 - x_length] = char_set[cell_wall_char(cell, :up)]
+
+    s[i + 2] = char_set[cell_wall_char(cell, :right)]
+    s[i + 2 + x_length] = char_set[cell_wall_char(cell, :down_right)]
+
+    s[i + x_length] = char_set[cell_wall_char(cell, :down)]
+    s[i + 1 + x_length] = char_set[cell_wall_char(cell, :down)]
+
+    s[i - 1] = char_set[cell_wall_char(cell, :left)]
+    s[i - 1 + x_length] = char_set[cell_wall_char(cell, :down_left)]
+
+
+    if cell.pos.x == width - 1
+      s[i + 3 - 2 * x_length] = "\n" if cell.pos.y == 0
+      s[i + 3 - x_length] = "\n" if cell.pos.y == 0
+      s[i + 3] = "\n"
+      s[i + 3 + x_length] = "\n"
+    end
+  end
+
+  def colorize(s)
+    WALL_CHARS[true].each do |k, c|
+      next if k == :no_wall
+
+      s.gsub!(/[#{c}]/, BEGIN_RED + WALL_CHARS[false][k] + END_COLOR)
+    end
+
+    s
   end
 end

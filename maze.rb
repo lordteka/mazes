@@ -114,11 +114,11 @@ class Maze
   end
 
   def height
-    @maze.length
+    @height ||= @maze.length
   end
 
   def width
-    @maze[0].length
+    @width ||= @maze[0].length
   end
 
   def at(pos)
